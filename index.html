@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Sia ❤️</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        body { 
+            background-color: #e0f2fe; /* Baby Blue */
+            font-family: 'Poppins', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden; 
+        }
+
+        .container { text-align: center; width: 90%; max-width: 450px; }
+        .hidden { display: none !important; }
+        h1, h2 { color: #0369a1; }
+        
+        button { 
+            padding: 12px 30px; 
+            border-radius: 50px; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: 0.3s; 
+        }
+        
+        #startBtn, #yesBtn { background-color: #0ea5e9; color: white; }
+        #noBtn { background-color: white; color: #0369a1; border: 2px solid #0ea5e9; z-index: 1000; position: relative; }
+
+        /* GIFT GRID */
+        .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .gift-box { background: white; padding: 20px 10px; border-radius: 15px; border: 2px solid #bae6fd; cursor: pointer; }
+        .gift-label { font-size: 10px; color: #0369a1; font-weight: bold; }
+
+        /* PHOTOS */
+        .gallery-wrapper { display: flex; justify-content: center; gap: 10px; background: white; padding: 15px; border-radius: 15px; }
+        .photo-frame { width: 100px; height: 100px; overflow: hidden; border: 3px solid white; }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* MUSIC PLAYER */
+        .player-card { background: #7dd3fc; padding: 20px; border-radius: 25px; display: flex; align-items: center; gap: 15px; text-align: left; }
+        .vinyl { width: 80px; height: 80px; background: #333; border-radius: 50%; border: 5px solid white; animation: spin 5s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* MESSAGE */
+        .message-card { background: white; padding: 30px; border-radius: 30px; text-align: justify; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .message-text { font-size: 14px; line-height: 1.6; color: #334155; min-height: 200px; }
+    </style>
+</head>
+<body>
+
+    <!-- UNLOCK SOUND (First thing she sees) -->
+    <div id="unlock" class="container">
+        <img src="https://giphy.com" width="150" style="margin-bottom: 20px;">
+        <h2>Hi Sia! May surprise ako sa'yo...</h2>
+        <button id="startBtn" onclick="unlockAudio()">Open Surprise ❤️</button>
+    </div>
+
+    <!-- STEP 1: THE QUESTION -->
+    <div id="step1" class="container hidden">
+        <h1 id="questionTitle">Do you love me? ❤️</h1>
+        <p id="questionText" style="color: #0369a1;"></p>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <button id="yesBtn" onclick="showSection('step2')">YES</button>
+            <button id="noBtn" onmouseover="moveNo()" onclick="moveNo()">NO</button>
+        </div>
+    </div>
+
+    <!-- STEP 2: GIFTS -->
+    <div id="step2" class="container hidden">
+        <h2>I knew you'd say yes 💕</h2>
+        <div class="gift-grid">
+            <div class="gift-box" onclick="showSection('gift1')"><span>🖼️</span><div class="gift-label">MEMORIES</div></div>
+            <div class="gift-box" onclick="showSection('gift2')"><span>🎵</span><div class="gift-label">OUR SONG</div></div>
+            <div class="gift-box" onclick="showSection('gift3')"><span>✉️</span><div class="gift-label">MESSAGE</div></div>
+        </div>
+    </div>
+
+    <!-- GIFT 1: PHOTOS -->
+    <div id="gift1" class="container hidden">
+        <h2>Captured Memories</h2>
+        <div class="gallery-wrapper">
+            <div class="photo-frame"><img src="photo1.jpg"></div>
+            <div class="photo-frame"><img src="photo2.jpg"></div>
+            <div class="photo-frame"><img src="photo3.jpg"></div>
+        </div>
+        <button onclick="showSection('step2')" style="margin-top:20px; background:none; color:#0ea5e9; border:1px solid #0ea5e9;">Back</button>
+    </div>
+
+    <!-- GIFT 2: MUSIC -->
+    <div id="gift2" class="container hidden">
+        <div class="player-card">
+            <div class="vinyl"></div>
+            <div style="flex:1;">
+                <h3 style="margin:0; color:white;">Snow on the Beach</h3>
+                <p style="margin:0; font-size:12px; color:white; opacity:0.8;">Taylor Swift</p>
+                <div id="player" style="margin-top:10px;"></div>
+            </div>
+        </div>
+        <button onclick="showSection('step2')" style="margin-top:20px; background:none; color:#0ea5e9; border:1px solid #0ea5e9;">Back</button>
+    </div>
+
+    <!-- GIFT 3: MESSAGE -->
+    <div id="gift3" class="container hidden">
+        <div class="message-card">
+            <h2 style="font-family:'Dancing Script'; color:#0ea5e9;">To Sia,</h2>
+            <div id="typewriter" class="message-text"></div>
+            <p style="text-align:right; font-family:'Dancing Script'; font-size:24px; color:#0ea5e9;">Love you palagi ❤️</p>
+        </div>
+        <button onclick="showSection('step2')" style="margin-top:20px; background:none; color:#0ea5e9; border:1px solid #0ea5e9;">Back</button>
+    </div>
+
+    <!-- YOUTUBE API -->
+    <script src="https://youtube.com"></script>
+    <script>
+        let player;
+        let index = 0;
+        const message = "Looking back at everything we’ve shared, I am filled with so much gratitude that you walked into my life. I want you to know how deeply I value this chance to know you and to show you what you truly mean to me. Sia, I know I’m far from perfect, but I promise that I will never grow tired of taking care of you and making you feel how precious you are. My love for you isn't just found in words, it's a commitment I'm ready to prove every single day. Thank you for letting me into your world and for giving me the privilege of loving you. I will never get tired of choosing you, today and in all the tomorrows to come. I love you so much, Sia.";
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '80', width: '100%', videoId: 'ycE7bUq3-2k',
+                playerVars: { 'autoplay': 0, 'controls': 1, 'mute': 0 }
+            });
+        }
+
+        function unlockAudio() {
+            showSection('step1');
+            // Pinapagana ang player para "ready" na ang audio permission
+            if(player) { player.playVideo(); player.pauseVideo(); }
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            
+            if(id === 'gift2' && player) { 
+                player.unMute(); 
+                player.playVideo(); 
+            }
+            if(id === 'gift3') { 
+                document.getElementById("typewriter").innerHTML = ""; 
+                index = 0; 
+                startTypewriter(); 
+            }
+        }
+
+        function moveNo() {
+            document.getElementById('questionText').innerText = "Try muna ulit please! 🥺";
+            const btn = document.getElementById('noBtn');
+            btn.style.position = 'fixed';
+            btn.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+            btn.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+        }
+
+        function startTypewriter() {
+            const display = document.getElementById("typewriter");
+            if (index < message.length) {
+                display.innerHTML += message.charAt(index);
+                index++;
+                setTimeout(startTypewriter, 40);
+            }
+        }
+    </script>
+</body>
+</html>
